@@ -1,0 +1,16 @@
+{
+    "assistant_id": "asst_iB1kqClN0Qq1ut5h77VQkZsg",
+    "assistant_details": {
+        "build_params": {
+            "model": "gpt-3.5-turbo-1106",
+            "name": "Tool User",
+            "description": "Assistant to use tools made by the tool creator.",
+            "instructions": "Use the tools to accomplish the task",
+            "tools": [],
+            "file_ids": [],
+            "metadata": {}
+        },
+        "file_paths": [],
+        "functions": {}
+    }
+}

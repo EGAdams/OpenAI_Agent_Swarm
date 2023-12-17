@@ -1,5 +1,5 @@
 {
-  "model": "gpt-4-1106-preview",
+  "model": "gpt-3.5-turbo-1106",
   "description": "Foundation Swarm Builder",
   "tools": [{ "type": "code_interpreter" }],
   "metadata": {}

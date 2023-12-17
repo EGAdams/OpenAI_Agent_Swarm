@@ -1,0 +1,16 @@
+{
+    "name": "list_files_in_directory",
+    "description": "This tool lists all the files in a specified directory.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "directory_path": {
+                "type": "string",
+                "description": "The path of the directory to list files from."
+            }
+        },
+        "required": [
+            "directory_path"
+        ]
+    }
+}

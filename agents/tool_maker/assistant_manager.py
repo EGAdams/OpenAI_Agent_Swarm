@@ -93,7 +93,7 @@ class AssistantManager:
 
     def make_coding_assistant(self):
         code_assistant = self.client.beta.assistants.create(
-            model="gpt-4-1106-preview",
+            model="gpt-3.5-turbo-1106",
             instructions="you will be provided a json schema of an OpenAI function tool from an API not a human user. The json will contain all information about the function you will need to write it in python code. You will return only the python function you wrote and no additional text as you are talking to an API and extraneous output will cause execution errors. You must always implement the actual code. Generic placeholders or pseudo code will break the api. If you need clarification to write real functioning code, request for extra info in arguments without creating a real function or valid schema",
             name="temporary_function_writer",
         )

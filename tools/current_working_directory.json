@@ -1,0 +1,5 @@
+{
+    "name": "current_working_directory",
+    "description": "Get the current working directory",
+    "parameters": "{\"type\": \"object\",\"properties\": {},\"required\": []}"
+}

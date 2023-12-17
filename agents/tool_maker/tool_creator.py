@@ -5,6 +5,9 @@ create a tool-creator assistant using the assistant creation API
 import json
 import os
 
+import sys
+sys.path.append('/home/adamsl/linuxBash/thanksgiving_week_temp/OpenAI_Agent_Swarm')
+
 from shared.utils import chat as chat_loop
 from shared.openai_config import get_openai_client 
 

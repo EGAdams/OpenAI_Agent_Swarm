@@ -1,0 +1,5 @@
+{
+    "name": "find_file",
+    "description": "This tool searches for a specific file in a specified directory.",
+    "parameters": "{\"type\": \"object\", \"properties\": {\"file_name\": {\"type\": \"string\", \"description\": \"The name of the file to search for\"}, \"directory\": {\"type\": \"string\", \"description\": \"The full path to the directory where the file should be found\"}}, \"required\": [\"file_name\", \"directory\"]}"
+}

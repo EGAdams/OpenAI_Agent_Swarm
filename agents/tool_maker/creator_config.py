@@ -46,7 +46,7 @@ def new_tool_name(param1=None, param2='default_value'):
     def _build_assistant_details(self):
         return {
             'build_params' : {
-                'model': "gpt-4-1106-preview", 
+                'model': "gpt-3.5-turbo-1106", 
                 'name': "Tool Creator",
                 'description': "Assistant to create tools for use in the OpenAI platform by other Assistants.",
                 'instructions': self.instructions_for_assistant, 

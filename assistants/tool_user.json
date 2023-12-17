@@ -1,0 +1,38 @@
+{
+    "assistant_id": "asst_pvJKZvrQqM7cGS08vfuONV2x",
+    "assistant_details": {
+        "build_params": {
+            "model": "gpt-3.5-turbo-1106",
+            "name": "Tool User",
+            "description": "Assistant to use tools made by the tool creator.",
+            "instructions": "Use the tools to accomplish the task",
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "list_files_in_directory",
+                        "description": "This tool lists all the files in a specified directory.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "directory_path": {
+                                    "type": "string",
+                                    "description": "The path of the directory to list files from."
+                                }
+                            },
+                            "required": [
+                                "directory_path"
+                            ]
+                        }
+                    }
+                }
+            ],
+            "file_ids": [],
+            "metadata": {}
+        },
+        "file_paths": [],
+        "functions": {
+            "list_files_in_directory": "import os\n\ndef list_files_in_directory(directory_path):\n    try:\n        file_list = os.listdir(directory_path)\n        return file_list\n    except Exception as e:\n        return str(e)"
+        }
+    }
+}
