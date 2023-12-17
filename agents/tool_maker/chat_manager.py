@@ -1,11 +1,9 @@
 import importlib
 from pathlib import Path
-from tool_manager import ToolManager
+from agents.tool_maker.tool_manager import ToolManager
 import json
 import os
-
 from openai import OpenAI
-from tool_manager import ToolManager
 
 Assistant = type(OpenAI().beta.assistants.list().data[0])
 Thread = type(OpenAI().beta.threads.create())
@@ -14,11 +12,11 @@ Thread = type(OpenAI().beta.threads.create())
 class ChatManager:
     def __init__(self, client: OpenAI):
         self.client = client
-        Path(__file__).absolute().parent
         functions_path = os.path.join(
             Path(__file__).absolute().parent, "python_functions"
         )
         self.functions_path = functions_path
+        print(self.functions_path)
 
     def create_thread_from_user_input(self):
         return self.client.beta.threads.create(
@@ -30,12 +28,17 @@ class ChatManager:
 
     def run_python_from_function_name(self, call):
         print("CALLING FUNCTION")
+        base = ".".join(__name__.split(".")[:-1])
         try:
             function_name = call.function.name
+
             fn = getattr(
-                importlib.import_module(f"python_functions.{function_name}"),
+                importlib.reload(
+                    importlib.import_module(f"{base}.python_functions.{function_name}")
+                ),
                 function_name,
             )
+            print(fn)
             result = fn(**json.loads(call.function.arguments))
             response = {"tool_call_id": call.id, "output": f"result:{result}"}
         except Exception as error:
@@ -43,7 +46,19 @@ class ChatManager:
                 "tool_call_id": call.id,
                 "output": f"{{{type(error)}:{error.args}}}",
             }
+        print(response)
         return response
+    
+    def get_existing_functions(self):
+        print("Get Built Functions")
+        results = []
+        if os.path.exists(self.functions_path):
+            for filename in os.listdir(self.functions_path):
+                if filename.endswith(".json"):
+                    file_path = os.path.join(self.functions_path,filename)
+                    with open(file_path, "r") as file:
+                        results.append(file)
+        return results
 
     def handle_fucntion_request(
         self,
@@ -57,13 +72,14 @@ class ChatManager:
             # Create Function Tool
             schema = ToolManager.schema_from_response(call.function.arguments)
             tool = ToolManager.tool_from_function_schema(schema)
+            filtered_interface_assistant_tools = list(filter(lambda tool: tool.type == "function" ,interface_assistant.tools))
             if tool["function"]["name"] in [
                 previous_tool.function.name
-                for previous_tool in interface_assistant.tools
+                for previous_tool in filtered_interface_assistant_tools
             ]:
                 tools = [
                     previous_tool
-                    for previous_tool in interface_assistant.tools
+                    for previous_tool in filtered_interface_assistant_tools
                     if previous_tool.function.name != tool["function"]["name"]
                 ]
                 interface_assistant = self.client.beta.assistants.update(
@@ -83,8 +99,8 @@ class ChatManager:
             functional_run = self.client.beta.threads.runs.create(
                 thread_id=functional_thread.id,
                 assistant_id=functional_assistant.id,
-                instructions="please remember you are talking to an API, minimize output text tokens for cost saving. Also realise that your output text must be directly runnable as a py file so begin with the def keyword and do not provide any text ouput which is not commented to avoid breaking the system. Target python 3 and windows",
             )
+            
             functional_response = self.simple_run(
                 run=functional_run,
                 thread=functional_thread,
@@ -95,6 +111,8 @@ class ChatManager:
                 os.mkdir(self.functions_path)
             with open(f"{self.functions_path}/{name}.py", "w") as file:
                 file.writelines(function_lines)
+            with open(f"{self.functions_path}/{name}.json", "w") as file:
+                file.writelines(str(schema))
 
             response = {"tool_call_id": call.id, "output": "{success}"}
 
@@ -113,6 +131,28 @@ class ChatManager:
             run = self.client.beta.threads.runs.retrieve(
                 run_id=run.id, thread_id=thread.id
             )
+            if run.status == "requires_action":
+                responses = []
+                for call in run.required_action.submit_tool_outputs.tool_calls:
+                    print(f"calling: {call.function.name}")
+                    if call.function.name == "get_existing_functions":
+                        available_functions = self.get_existing_functions()
+                        response = {"tool_call_id": call.id, "output": f"result:{available_functions}"}
+                        responses.append(response)
+                    else:
+                        response = {"tool_call_id": call.id, "output": f"result:None"}
+                        responses.append(response)
+                try:
+                    run = self.client.beta.threads.runs.submit_tool_outputs(
+                        run_id=run.id,
+                        thread_id=thread.id,
+                        tool_outputs=responses,
+                    )
+                except:
+                    print(run.status)
+                    print(run)
+                    print(call)
+                    print(responses)
 
         response = (
             self.client.beta.threads.messages.list(thread_id=thread.id)
